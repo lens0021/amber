@@ -1,0 +1,139 @@
+import {
+    confirm,
+    echo_info,
+    error,
+    is_command,
+    shell_var_set,
+} from "std/env"
+import {
+    contains,
+    join,
+    replace_regex,
+    slice,
+    starts_with,
+} from "std/text"
+import {
+    includes,
+} from "std/array"
+
+fun contains_regex(text: Text, search: Text, extended: Bool = false): Bool {
+    return text != replace_regex(text, search, "", extended)
+}
+
+fun equals_regex(text: Text, search: Text, extended: Bool = false): Bool {
+    return replace_regex(text, search, "", extended) == ""
+}
+
+const container_name = "amber_bash_test_container"
+const bash_versions = [
+  "3.2",
+  "4.0",
+  "4.1",
+  "4.2",
+  "4.3",
+  "4.4",
+  "5.0",
+  "5.1",
+  "5.2",
+]
+const default_bash_version = "5.1"
+
+fun parse_bash_versions(arguments: [Text]): [Text] {
+    const joined = join(arguments, " ")
+    const regex = "[0-9]\.[0-9]-[0-9]\.[0-9]"
+    if contains_regex(joined, regex, true) {
+        echo "joined: {joined}"
+        for arg in arguments {
+            if equals_regex(arg, regex, true) {
+                let versions = [Text]
+                const left = slice(arg, 0, 3)
+                const right = slice(arg, 4, 3)
+                let flag_started = false
+                for ver in bash_versions {
+                    if ver == left:
+                        flag_started = true
+                    if flag_started:
+                        versions += [ver]
+                    if ver == right:
+                        return versions
+                }
+            }
+        }
+    } else {
+        let versions = [Text]
+        let last_is_dash = false
+        for arg in arguments {
+            if contains(arg, "bash"): continue
+            if starts_with(arg, "--") {
+                last_is_dash = true
+                continue
+            }
+            if last_is_dash {
+                last_is_dash = false
+                continue
+            }
+            versions += [arg]
+        }
+        return versions
+    }
+    return [default_bash_version]
+    // return [
+    // ]
+}
+
+main(args) {
+    if not is_command("docker"):
+        error("Docker is required")
+
+    if includes(args, "-h") or includes(args, "--help") {
+        echo "{args[0]} [-h|--help] [--sleep NUM] [VERSION(S)]"
+        echo ""
+        echo "Examples:"
+        echo "{args[0]}                 # Run test on bash {default_bash_version}. (default)"
+        echo "{args[0]} 3.2-5.2         # Run test on bash 3.2 to 5.2."
+        echo "{args[0]} 4.4 5.2         # Run test on bash 4.4 and 5.2."
+        echo "{args[0]} 3.2-4.1 5.2     # Mixed range is not supported."
+        echo "{args[0]} --sleep 300 5.2 # Launch a container which lives 300 seconds. If tests are not done in the lifetime, bad things happen."
+        exit(0)
+    }
+
+    let sleep = "infinity"
+    for i, arg in args {
+        if arg == "--sleep" {
+            sleep = args[i+1]
+        }
+    }
+    const versions = parse_bash_versions(args)
+    for ver in versions {
+        echo "Version: {ver}"
+        trust {
+            // Firch, check whether there is a container since last test.
+            let running_container = $ docker container ls --quiet --filter name={container_name}_{ver} $
+            if running_container == "" {
+                // Run a detached docker container.
+                silent $ docker rm -f {container_name} $
+                silent $ docker run --rm --network host --detach --name {container_name}_{ver} bash:{ver} sleep {sleep} $
+                $ docker exec {container_name}_{ver} apk add coreutils curl sed $
+            }
+
+            // Run the tests.
+            shell_var_set("AMBER_TEST_STRATEGY", "docker")
+            shell_var_set("AMBER_TEST_ARGS", join([
+                "exec",
+                "--user 405",
+                "{container_name}_{ver}",
+                "bash"
+            ], " "))
+        }
+        $ cargo test --all-targets --all-features $ failed {
+            confirm("The tests for {ver} is failed. Continue?")
+        }
+
+        if sleep == "infinity" {
+            // Stop and remove the docker container.
+            silent $ docker rm -f {container_name}_{ver} $ failed {
+                error("Stopping {container_name}_{ver} failed. You should stop it manually.")
+            }
+        }
+    }
+}
