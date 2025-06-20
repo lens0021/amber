@@ -2,11 +2,19 @@ import * from "std/fs"
 import { array_contains } from "std/array"
 
 main {
-    let tmpdir = trust $ mktemp -d /tmp/amber-XXXX $
+    let tmpdir = $ mktemp -d /tmp/amber-XXXX $ failed {
+        echo "Error making directory /tmp/amber-XXXX"
+    }
     cd tmpdir
-    trust $ touch test.txt $
-    silent trust $tar -czf "filename.tar.gz" "{tmpdir}/test.txt"$
-    trust $ rm "test.txt" $
+    $ touch test.txt $ failed {
+        echo "Error touching test.txt"
+    }
+    silent $ tar -czf "filename.tar.gz" "{tmpdir}/test.txt" $ failed {
+        echo "Error compressing"
+    }
+    $ rm "test.txt" $ failed {
+        echo "Error removing test.txt"
+    }
     let package = tmpdir + "/" + "filename.tar.gz"
 
     file_extract(package, tmpdir) failed {
@@ -17,5 +25,7 @@ main {
         echo "Succeeded"
     }
 
-    trust $ rm -rf "{tmpdir}" $
+    trust $ rm -rf "{tmpdir}" $ failed {
+        echo "Error removing"
+    }
 }
