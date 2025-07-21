@@ -1,4 +1,10 @@
 // Output
 // Hello World
+// Hello W
 
 echo $ echo { $ echo Hello World $ failed { } } $ failed { }
+const text = "world"
+fun no_answer(text) {
+    trust $ echo \"Hello W\$\{text}\" $
+}
+no_answer("orld")
