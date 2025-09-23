@@ -118,6 +118,7 @@ mod tests {
         assert_eq!(i_str.translate_escaped_string(r#"hello"#.to_string()), r#"hello"#);
         assert_eq!(i_str.translate_escaped_string(r#"\"#.to_string()), r#"\\"#);
         assert_eq!(i_str.translate_escaped_string(r#"""#.to_string()), r#"\""#);
+        assert_eq!(i_str.translate_escaped_string(r#"'"#.to_string()), r#"'"#);
         assert_eq!(i_str.translate_escaped_string(r#"$"#.to_string()), r#"\$"#);
         assert_eq!(i_str.translate_escaped_string(r#"\$"#.to_string()), r#"\\\$"#);
         assert_eq!(i_str.translate_escaped_string(r#"{"#.to_string()), r#"{"#);
@@ -132,6 +133,7 @@ mod tests {
         assert_eq!(i_glo.translate_escaped_string(r#"\"#.to_string()), r#"\"#);
         assert_eq!(i_glo.translate_escaped_string(r#"\\"#.to_string()), r#"\\"#);
         assert_eq!(i_glo.translate_escaped_string(r#"""#.to_string()), r#"""#);
+        assert_eq!(i_glo.translate_escaped_string(r#"'"#.to_string()), r#"'"#);
         assert_eq!(i_glo.translate_escaped_string(r#"$"#.to_string()), r#"$"#);
         assert_eq!(i_glo.translate_escaped_string(r#"\$"#.to_string()), r#"\$"#);
         assert_eq!(i_glo.translate_escaped_string(r#"{"#.to_string()), r#"{"#);

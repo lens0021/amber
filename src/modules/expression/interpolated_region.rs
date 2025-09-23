@@ -42,14 +42,8 @@ fn parse_escaped_string(string: String, region_type: &InterpolatedRegionType) ->
                 Some('r') => result.push('\r'),
                 Some('0') => result.push('\0'),
                 Some('{') => result.push('{'),
-                Some('"') => {
-                    if *region_type == InterpolatedRegionType::Text {
-                        result.push('"');
-                    } else {
-                        result.push(c);
-                        continue;
-                    }
-                }
+                Some('"') => result.push('"'),
+                Some('\'') => result.push('\''),
                 Some('$') => {
                     if *region_type == InterpolatedRegionType::Command {
                         result.push('$');
@@ -142,6 +136,7 @@ mod tests {
         assert_eq!(parse_escaped_string("\r".to_string(), &text_type), "\r");
         assert_eq!(parse_escaped_string("\0".to_string(), &text_type), "\0");
         assert_eq!(parse_escaped_string(r#"\\"#.to_string(), &text_type), r#"\"#);
+        assert_eq!(parse_escaped_string(r#"'"#.to_string(), &text_type), r#"'"#);
         assert_eq!(parse_escaped_string(r#"\""#.to_string(), &text_type), r#"""#);
         assert_eq!(parse_escaped_string(r#"$"#.to_string(), &text_type), r#"$"#);
         assert_eq!(parse_escaped_string(r#"\\$"#.to_string(), &text_type), r#"\$"#);
@@ -158,6 +153,9 @@ mod tests {
         assert_eq!(parse_escaped_string("\0".to_string(), &command_type), "\0");
         assert_eq!(parse_escaped_string(r#"\\"#.to_string(), &command_type), r#"\"#);
         assert_eq!(parse_escaped_string(r#"""#.to_string(), &command_type), r#"""#);
+        assert_eq!(parse_escaped_string(r#"\""#.to_string(), &command_type), r#"""#);
+        assert_eq!(parse_escaped_string(r#"'"#.to_string(), &command_type), r#"'"#);
+        assert_eq!(parse_escaped_string(r#"\'"#.to_string(), &command_type), r#"'"#);
         assert_eq!(parse_escaped_string(r#"\$"#.to_string(), &command_type), r#"$"#);
         assert_eq!(parse_escaped_string(r#"\\\$"#.to_string(), &command_type), r#"\$"#);
         assert_eq!(parse_escaped_string(r#"\{"#.to_string(), &command_type), r#"{"#);
