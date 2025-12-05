@@ -185,7 +185,7 @@ jobs:
               echo "tag_name=skip" >> $GITHUB_OUTPUT
               echo "Nightly release already exists for SHA ${SHORT_SHA}"
             else
-              NIGHTLY_TAG="nightly-$(date --iso-8601)-${SHORT_SHA}"
+              NIGHTLY_TAG="nightly-$(yq .package.version Cargo.toml)-$(date --iso-8601)-${SHORT_SHA}"
               echo "tag_name=$NIGHTLY_TAG" >> $GITHUB_OUTPUT
               echo "prerelease=true" >> $GITHUB_OUTPUT
             fi
