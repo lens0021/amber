@@ -1,10 +1,6 @@
 name: Amber Release
 
 on:
-  release:
-    types: [published]
-  schedule:
-    - cron: '0 0 * * *'
   workflow_dispatch:
 
 env:
@@ -201,7 +197,7 @@ jobs:
         if: steps.tag_name.outputs.tag_name != 'skip'
         uses: svenstaro/upload-release-action@v2
         with:
-          repo_token: ${{ secrets.RELEASE_PAT }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: dist/*
           file_glob: true
           tag: ${{ steps.tag_name.outputs.tag_name }}
