@@ -1,0 +1,24 @@
+// Output
+// 1 2 3
+// a b c
+
+// Test arrays with inline comments
+const arr1 = [
+    1,
+    // This is a comment
+    2,
+    // Another comment
+    3
+]
+echo arr1
+
+// Test arrays with multiple consecutive comments
+const arr2 = [
+    "a",
+    // First comment
+    // Second comment
+    // Third comment
+    "b",
+    "c"
+]
+echo arr2
