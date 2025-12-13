@@ -2,9 +2,6 @@ name: Cargo & Clippy Test
 
 on:
   push:
-    branches: 
-      - main
-      - staging
     paths:
       - .github/workflows/rust.yml
       - src/**
