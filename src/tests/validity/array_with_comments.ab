@@ -12,13 +12,15 @@ const arr1 = [
 ]
 echo arr1
 
-// Test arrays with multiple consecutive comments
 const arr2 = [
     "a",
+    // Multiple consecutive comments
     // First comment
     // Second comment
     // Third comment
     "b",
-    "c"
+    // Test arrays with comments and trailing comma
+    "c",
+    // Trailing comment
 ]
 echo arr2
