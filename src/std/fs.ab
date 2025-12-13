@@ -69,10 +69,7 @@ pub fun file_append(path: Text, content: Text): Text? {
 /// ```
 pub fun symlink_create(origin: Text, destination: Text): Null? {
     if file_exists(origin) {
-        if file_exists(destination) {
-            trust $ rm "{destination}" $
-        }
-        $ ln -s "{origin}" "{destination}" $?
+        $ ln -sf "{origin}" "{destination}" $?
         return null
     }
 
